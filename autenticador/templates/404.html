@@ -1,0 +1,9 @@
+{% extends 'base/base.html'%}
+
+{% block title %}
+		Página no encontrada
+{% endblock %}
+
+{% block content %}
+	<img src="{{ url_for('static', filename='./notFound.png') }}">
+{% endblock %}
