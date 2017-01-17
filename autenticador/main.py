@@ -15,18 +15,20 @@ csrf = CsrfProtect()
 
 @app.before_request
 def before_request():
-    g.test = 'test1'
-    if 'username' not in session:
-        print 'El usuario necesita autenticarse'
+#     g.test = 'test1'
+#     if 'username' not in session:
+#         print 'El usuario necesita autenticarse'
+      if 'username' in session and request.endpoint in ['login','create']:
+        return redirect(url_for('index'))
 
-@app.after_request
-def after_request(response):
-    print g.test
-    return response
+# @app.after_request
+# def after_request(response):
+#     print g.test
+#     return response
 
 @app.route('/')
 def index():
-    print g.test
+    #print g.test
     #custome_cookie = request.cookies.get('custome_cookie','Undefined')
     #print custome_cookie
     if 'username' in session:
@@ -34,15 +36,29 @@ def index():
         print username
     return render_template('index.html')
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/login', methods = ['GET', 'POST'])
 def login():
-    login_form = forms.LoginForm(request.form)
-    if request.method == 'POST' and login_form.validate():
-        username = login_form.username.data
-        success_message = 'Bienvenido {}'.format(username)
-        flash(success_message)
-        session['username'] = login_form.username.data
-    return render_template('login.html', form=login_form)
+	login_form = forms.LoginForm(request.form)
+	if request.method == 'POST' and login_form.validate():
+		username = login_form.username.data
+		password = login_form.password.data
+
+		user = User.query.filter_by(username = username).first()
+		if user is not None and user.verify_password(password):
+			success_message = 'Bienvenido {}'.format(username)
+			flash(success_message)
+
+			session['username'] = username
+			session['user_id'] = user.id
+
+			return redirect( url_for('index') )
+
+		else:
+			error_message= 'Usuario o password no validos!'
+			flash(error_message)
+
+		session['username'] = login_form.username.data
+	return render_template('login.html', form = login_form)
 
 @app.route('/logout')
 def logout():
@@ -69,12 +85,28 @@ def comment():
 
     return render_template('comment.html', form = comment_form)
 
-@app.route('/ajax-login', methods=['POST'])
-def ajax_login():
-    print request.form
-    username = request.form['username']
-    response = {'status':200,'username':username, 'id':1}
-    return json.dumps(response)
+# @app.route('/ajax-login', methods=['POST'])
+# def ajax_login():
+#     print request.form
+#     username = request.form['username']
+#     response = {'status':200,'username':username, 'id':1}
+#     return json.dumps(response)
+
+@app.route('/create', methods=['GET','POST'])
+def create():
+    create_form = forms.CreateForm(request.form)
+    if request.method == 'POST' and create_form.validate():
+
+        user = User(create_form.username.data,
+                    create_form.password.data,
+                    create_form.email.data)
+
+        db.session.add(user)
+        db.session.commit()
+
+        success_message = 'Usuario registrado en la base de datos'
+        flash(success_message)
+    return render_template('create.html', form=create_form)
 
 @app.errorhandler(404)
 def page_not_found(e):

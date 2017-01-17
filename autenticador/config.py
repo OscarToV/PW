@@ -4,5 +4,5 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     DEBUG = True
-    SQLAlCHEMY_DATABASE_URI = 'mysql://root:@localhost/flask'
+    SQLALCHEMY_DATABASE_URI = 'mysql://root:@localhost/flask'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
