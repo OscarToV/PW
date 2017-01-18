@@ -1,5 +1,8 @@
-from flask import Flask,request,render_template,make_response,session,redirect,url_for,flash,g
+from flask import Flask,request,render_template,jsonify
+from flask import make_response,session,redirect,url_for,flash,g
 from flask_wtf import CsrfProtect
+from flaskext.mysql import MySQL
+import itertools
 
 from config import DevelopmentConfig
 from models import db
@@ -10,16 +13,24 @@ import forms
 
 app = Flask(__name__) #nuevo objeto
 app.config.from_object(DevelopmentConfig)
+mysql = MySQL()
+mysql.init_app(app)
 
 csrf = CsrfProtect()
+
+
+def dictfetchall(cursor):
+	desc = cursor.description
+	return [dict(itertools.izip([col[0] for col in desc],row))
+			for row in cursor]
 
 @app.before_request
 def before_request():
 #     g.test = 'test1'
 #     if 'username' not in session:
 #         print 'El usuario necesita autenticarse'
-      if 'username' in session and request.endpoint in ['login','create']:
-        return redirect(url_for('index'))
+	  if 'username' in session and request.endpoint in ['login','create']:
+		return redirect(url_for('index'))
 
 # @app.after_request
 # def after_request(response):
@@ -28,13 +39,31 @@ def before_request():
 
 @app.route('/')
 def index():
-    #print g.test
-    #custome_cookie = request.cookies.get('custome_cookie','Undefined')
-    #print custome_cookie
-    if 'username' in session:
-        username = session['username']
-        print username
-    return render_template('index.html')
+	#print g.test
+	#custome_cookie = request.cookies.get('custome_cookie','Undefined')
+	#print custome_cookie
+	if 'username' in session:
+		username = session['username']
+		print username
+	return render_template('index.html')
+
+@app.route('/user')
+def listaU():
+	param = request.args.get('email',None)
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+		if param is None:
+			cursor.execute('SELECT * FROM users')
+		else:
+			cursor.execute("SELECT * FROM users WHERE email = '{}'".format(param))
+	except Exception as e:
+		return render_template("ErrorBD.html", error= str(e))
+
+	results = dictfetchall(cursor)
+	return jsonify(datos=results)
+
+
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
@@ -62,28 +91,28 @@ def login():
 
 @app.route('/logout')
 def logout():
-    if 'username' in session:
-        session.pop('username')
-    return redirect(url_for('login'))
+	if 'username' in session:
+		session.pop('username')
+	return redirect(url_for('login'))
 
 @app.route('/cookie')
 def cookie():
-    response = make_response( render_template('cookie.html') )
-    response.set_cookie('custome_cookie','Oscar')
-    return response
+	response = make_response( render_template('cookie.html') )
+	response.set_cookie('custome_cookie','Oscar')
+	return response
 
 @app.route('/comment', methods=['GET','POST'])
 def comment():
-    comment_form = forms.CommentForm(request.form)
+	comment_form = forms.CommentForm(request.form)
 
-    if request.method == 'POST' and comment_form.validate():
-        print comment_form.username.data
-        print comment_form.email.data
-        print comment_form.comment.data
-    else:
-        print "Error en el formulario"
+	if request.method == 'POST' and comment_form.validate():
+		print comment_form.username.data
+		print comment_form.email.data
+		print comment_form.comment.data
+	else:
+		print "Error en el formulario"
 
-    return render_template('comment.html', form = comment_form)
+	return render_template('comment.html', form = comment_form)
 
 # @app.route('/ajax-login', methods=['POST'])
 # def ajax_login():
@@ -94,27 +123,27 @@ def comment():
 
 @app.route('/create', methods=['GET','POST'])
 def create():
-    create_form = forms.CreateForm(request.form)
-    if request.method == 'POST' and create_form.validate():
+	create_form = forms.CreateForm(request.form)
+	if request.method == 'POST' and create_form.validate():
 
-        user = User(create_form.username.data,
-                    create_form.password.data,
-                    create_form.email.data)
+		user = User(create_form.username.data,
+					create_form.password.data,
+					create_form.email.data)
 
-        db.session.add(user)
-        db.session.commit()
+		db.session.add(user)
+		db.session.commit()
 
-        success_message = 'Usuario registrado en la base de datos'
-        flash(success_message)
-    return render_template('create.html', form=create_form)
+		success_message = 'Usuario registrado en la base de datos'
+		flash(success_message)
+	return render_template('create.html', form=create_form)
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return render_template('404.html')
+	return render_template('404.html')
 
 if __name__ == '__main__':
-    csrf.init_app(app)
-    db.init_app(app)
-    with app.app_context():
-        db.create_all()
-    app.run(port = 8000) #se encarga de ejecutar el servidor
+	csrf.init_app(app)
+	db.init_app(app)
+	with app.app_context():
+		db.create_all()
+	app.run(port = 8000) #se encarga de ejecutar el servidor
