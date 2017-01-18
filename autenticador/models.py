@@ -23,3 +23,15 @@ class User(db.Model):
 
     def verify_password(self, password):
         return check_password_hash(self.password,password)
+
+class Rol(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(40))
+    code = db.Column(db.String(60))
+
+
+class Service(db.Model):
+    __tablename__ = 'services'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(60))

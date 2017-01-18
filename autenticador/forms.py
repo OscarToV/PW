@@ -45,5 +45,5 @@ class CreateForm(Form):
 	def validate_username (form, field):
 		username = field.data
 		user = User.query.filter_by(username = username).first()
-		if username is not None:
+		if user is not None:
 			raise validators.ValidationError('El username ya se encuentra registrado.')
