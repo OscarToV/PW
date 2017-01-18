@@ -24,6 +24,15 @@ def dictfetchall(cursor):
 	return [dict(itertools.izip([col[0] for col in desc],row))
 			for row in cursor]
 
+def consulta(sql):
+	try:
+		conn = mysql.connect()
+		cursor = conn.cursor()
+		cursor.execute(sql)
+	except Exception as e:
+		return render_template('ErrorBD.html', error=str(e))
+	return cursor
+
 @app.before_request
 def before_request():
 #     g.test = 'test1'
@@ -50,19 +59,28 @@ def index():
 @app.route('/user')
 def listaU():
 	param = request.args.get('email',None)
-	try:
-		conn = mysql.connect()
-		cursor = conn.cursor()
-		if param is None:
-			cursor.execute('SELECT * FROM users')
-		else:
-			cursor.execute("SELECT * FROM users WHERE email = '{}'".format(param))
-	except Exception as e:
-		return render_template("ErrorBD.html", error= str(e))
+
+	if param is None:
+		cursor = consulta('SELECT username FROM users')
+	else:
+		cursor = consulta("SELECT username FROM users WHERE email = '{}'".format(param))
 
 	results = dictfetchall(cursor)
 	return jsonify(datos=results)
 
+@app.route('/rol')
+def listaR():
+	sql = 'SELECT * FROM roles'
+	cursor = consulta(sql)
+	results = dictfetchall(cursor)
+	return jsonify(datos=results)
+
+@app.route('/service')
+def listaS():
+	sql = 'SELECT * FROM services'
+	cursor = consulta(sql)
+	results = dictfetchall(cursor)
+	return jsonify(datos=results)
 
 
 @app.route('/login', methods = ['GET', 'POST'])
