@@ -61,9 +61,9 @@ def listaU():
 	param = request.args.get('email',None)
 
 	if param is None:
-		cursor = consulta('SELECT username FROM users')
+		cursor = consulta('SELECT username,email,created_date,code AS rol FROM users LEFT JOIN userrol ON userrol.user_id = users.id JOIN roles ON userrol.rol_id = roles.id')
 	else:
-		cursor = consulta("SELECT username FROM users WHERE email = '{}'".format(param))
+		cursor = consulta("SELECT username,email,created_date,code AS rol FROM users LEFT JOIN userrol ON userrol.user_id = users.id JOIN roles ON userrol.rol_id = roles.id WHERE email = '{}'".format(param))
 
 	results = dictfetchall(cursor)
 	return jsonify(datos=results)

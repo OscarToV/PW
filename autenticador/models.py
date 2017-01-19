@@ -11,6 +11,7 @@ class User(db.Model):
     email = db.Column(db.String(40))
     password = db.Column(db.String(66))
     created_date = db.Column(db.DateTime, default = datetime.datetime.now)
+    URol = db.relationship('UserRol')
 
 
     def __init__(self, username, password, email):
@@ -29,9 +30,22 @@ class Rol(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(40))
     code = db.Column(db.String(60))
+    URol = db.relationship('UserRol')
 
 
 class Service(db.Model):
     __tablename__ = 'services'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(60))
+
+class UserRol(db.Model):
+    __tablename__ = 'userrol'
+    id = db.Column(db.Integer(), primary_key=True)
+    rol_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    started_by = db.Column(db.String(40))
+    finished_by = db.Column(db.String(40))
+    started_at =  db.Column(db.DateTime, default = datetime.datetime.now)
+    finished_at = db.Column(db.DateTime, default=None)
+    finished_reason = db.Column(db.Text())
+    comment = db.Column(db.Text())
