@@ -1,8 +1,9 @@
 {% extends 'base/base.html' %}
-{% block title %}Comment{% endblock %}
+{% block title %}Editar datos{% endblock %}
 
 {% block content %}
   {% from "_macro.html" import render_field %}
+  <h2>Editar</h2>
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
@@ -12,24 +13,18 @@
         <form name="sentMessage" id="contactForm" method="POST">
           <div class="row control-group">
             <div class="form-group col-xs-12 floating-label-form-group controls">
-              {{ render_field(form.username, class='form-control', placeholder='Oscar') }}
+              {{ render_field(form.username, class='form-control', placeholder='Username') }}
               <p class="help-block text-danger"></p>
             </div>
           </div>
 
           <div class="row control-group">
             <div class="form-group col-xs-12 floating-label-form-group controls">
-              {{ render_field(form.email, class='form-control') }}
+              {{ render_field(form.email, class='form-control', placeholder='algo@gmail.com') }}
               <p class="help-block text-danger"></p>
             </div>
           </div>
 
-          <div class="row control-group">
-            <div class="form-group col-xs-12 floating-label-form-group controls">
-              {{ render_field(form.comment, class='form-control') }}
-              <p class="help-block text-danger"></p>
-            </div>
-          </div>
           {{form.honneypot}}
           <br>
           <div id="success"></div>

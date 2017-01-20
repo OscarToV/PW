@@ -36,12 +36,13 @@ def consulta(sql):
 @app.before_request
 def before_request():
 #     g.test = 'test1'
-#     if 'username' not in session:
-#         print 'El usuario necesita autenticarse'
-	  if 'username' in session and request.endpoint in ['login']:
+    if 'username' not in session and request.endpoint in ['edit']:
+        return redirect(url_for('index'))
+        
+	if 'username' in session and request.endpoint in ['login']:
 		return redirect(url_for('index'))
 
-	  if 'username' in session and request.endpoint in ['create'] and session['rol'] != 'ADMINISTRADOR':
+	if 'username' in session and request.endpoint in ['create'] and session['rol'] != 'ADMINISTRADOR':
 	    return redirect(url_for('index'))
 
 
@@ -132,16 +133,16 @@ def cookie():
 	response.set_cookie('custome_cookie','Oscar')
 	return response
 
-@app.route('/comment', methods=['GET','POST'])
+@app.route('/edit', methods=['GET','POST'])
 def comment():
 	comment_form = forms.CommentForm(request.form)
 
 	if request.method == 'POST' and comment_form.validate():
 		print comment_form.username.data
 		print comment_form.email.data
-		print comment_form.comment.data
 	else:
 		print "Error en el formulario"
+
 
 	return render_template('comment.html', form = comment_form)
 
