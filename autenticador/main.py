@@ -6,7 +6,7 @@ import itertools
 
 from config import DevelopmentConfig
 from models import db
-from models import User
+from models import User,Rol,UserRol
 
 import json
 import forms
@@ -38,8 +38,13 @@ def before_request():
 #     g.test = 'test1'
 #     if 'username' not in session:
 #         print 'El usuario necesita autenticarse'
-	  if 'username' in session and request.endpoint in ['login','create']:
+	  if 'username' in session and request.endpoint in ['login']:
 		return redirect(url_for('index'))
+
+	  if 'username' in session and request.endpoint in ['create'] and session['rol'] != 'ADMINISTRADOR':
+	    return redirect(url_for('index'))
+
+
 
 # @app.after_request
 # def after_request(response):
@@ -91,17 +96,20 @@ def login():
 		password = login_form.password.data
 
 		user = User.query.filter_by(username = username).first()
-		rol = consulta('SELECT code AS rol FROM users JOIN userrol ON userrol.id = users.id JOIN roles ON userrol.id = roles.id WHERE users.id={}'.format(user.id))
+		#rol = consulta('SELECT code AS rol FROM users JOIN userrol ON userrol.id = users.id JOIN roles ON userrol.id = roles.id WHERE users.id={}'.format(user.id))
+		rol = Rol.query.join(UserRol, User).add_columns(Rol.code).filter_by(id=user.id).first()
 		if user is not None and user.verify_password(password):
 			success_message = 'Bienvenido {}'.format(username)
 			flash(success_message)
 
 			session['username'] = username
 			session['user_id'] = user.id
-			print user.id
-			 
-
-			return redirect( url_for('index') )
+			session['rol'] = rol.code
+			email = user.email
+			if rol.code == 'ADMINISTRADOR':
+				return redirect(url_for('index'))
+			else:
+				return render_template('dashboardUser.html', username = username, email = email)
 
 		else:
 			error_message= 'Usuario o password no validos!'
@@ -114,6 +122,8 @@ def login():
 def logout():
 	if 'username' in session:
 		session.pop('username')
+		session.pop('user_id')
+		session.pop('rol')
 	return redirect(url_for('login'))
 
 @app.route('/cookie')
