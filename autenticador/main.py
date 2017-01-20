@@ -91,12 +91,15 @@ def login():
 		password = login_form.password.data
 
 		user = User.query.filter_by(username = username).first()
+		rol = consulta('SELECT code AS rol FROM users JOIN userrol ON userrol.id = users.id JOIN roles ON userrol.id = roles.id WHERE users.id={}'.format(user.id))
 		if user is not None and user.verify_password(password):
 			success_message = 'Bienvenido {}'.format(username)
 			flash(success_message)
 
 			session['username'] = username
 			session['user_id'] = user.id
+			print user.id
+			 
 
 			return redirect( url_for('index') )
 
