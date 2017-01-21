@@ -35,15 +35,17 @@ def consulta(sql):
 
 @app.before_request
 def before_request():
-#     g.test = 'test1'
-    if 'username' not in session and request.endpoint in ['edit']:
-        return redirect(url_for('index'))
-        
+	if 'username' not in session and request.endpoint in ['editar','create']:
+		error_message= 'Necesita autenticarse!'
+		flash(error_message)
+		return redirect(url_for('login'))
+
 	if 'username' in session and request.endpoint in ['login']:
 		return redirect(url_for('index'))
 
 	if 'username' in session and request.endpoint in ['create'] and session['rol'] != 'ADMINISTRADOR':
 	    return redirect(url_for('index'))
+
 
 
 
@@ -116,7 +118,6 @@ def login():
 			error_message= 'Usuario o password no validos!'
 			flash(error_message)
 
-		session['username'] = login_form.username.data
 	return render_template('login.html', form = login_form)
 
 @app.route('/logout')
@@ -133,18 +134,15 @@ def cookie():
 	response.set_cookie('custome_cookie','Oscar')
 	return response
 
-@app.route('/edit', methods=['GET','POST'])
-def comment():
+@app.route('/editar', methods=['GET','POST'])
+def editar():
 	comment_form = forms.CommentForm(request.form)
 
 	if request.method == 'POST' and comment_form.validate():
 		print comment_form.username.data
 		print comment_form.email.data
-	else:
-		print "Error en el formulario"
 
-
-	return render_template('comment.html', form = comment_form)
+	return render_template('editar.html', form = comment_form)
 
 # @app.route('/ajax-login', methods=['POST'])
 # def ajax_login():
