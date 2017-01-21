@@ -136,13 +136,22 @@ def cookie():
 
 @app.route('/editar', methods=['GET','POST'])
 def editar():
-	comment_form = forms.CommentForm(request.form)
+    edit_form = forms.EditForm(request.form)
 
-	if request.method == 'POST' and comment_form.validate():
-		print comment_form.username.data
-		print comment_form.email.data
+    if request.method == 'POST' and edit_form.validate():
 
-	return render_template('editar.html', form = comment_form)
+        user = User.query.get_or_404(session['user_id'])
+        user.username = edit_form.username.data
+        user.email = edit_form.email.data
+
+        db.session.commit()
+
+        success_message = 'Cambios realizados!'
+        flash(success_message)
+        
+        return redirect(url_for('index'))
+
+    return render_template('editar.html', form = edit_form)
 
 # @app.route('/ajax-login', methods=['POST'])
 # def ajax_login():
