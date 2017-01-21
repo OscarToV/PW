@@ -35,7 +35,7 @@ def consulta(sql):
 
 @app.before_request
 def before_request():
-	if 'username' not in session and request.endpoint in ['editar','create']:
+	if 'username' not in session and request.endpoint in ['editar','create','dashboard']:
 		error_message= 'Necesita autenticarse!'
 		flash(error_message)
 		return redirect(url_for('login'))
@@ -64,6 +64,13 @@ def index():
 		print username
 	return render_template('index.html')
 
+@app.route('/dashboard')
+def dashboard():
+    user = User.query.filter_by(username = session['username']).first()
+
+    return render_template('dashboard.html', username=user.username, email = user.email)
+
+
 @app.route('/user')
 def listaU():
 	param = request.args.get('email',None)
@@ -75,6 +82,7 @@ def listaU():
 
 	results = dictfetchall(cursor)
 	return jsonify(datos=results)
+
 
 @app.route('/rol')
 def listaR():
@@ -112,7 +120,7 @@ def login():
 			if rol.code == 'ADMINISTRADOR':
 				return redirect(url_for('index'))
 			else:
-				return render_template('dashboardUser.html', username = username, email = email)
+				return render_template('dashboard.html', username = username, email = email)
 
 		else:
 			error_message= 'Usuario o password no validos!'
@@ -148,7 +156,7 @@ def editar():
 
         success_message = 'Cambios realizados!'
         flash(success_message)
-        
+
         return redirect(url_for('index'))
 
     return render_template('editar.html', form = edit_form)
