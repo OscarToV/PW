@@ -46,3 +46,9 @@ class CreateForm(Form):
 		user = User.query.filter_by(username = username).first()
 		if user is not None:
 			raise validators.ValidationError('El username ya se encuentra registrado.')
+
+class CreateServiceForm(Form):
+    name = StringField('name',[
+	    validators.Required(message='El nombre es requerido!'),
+		validators.length(min=3, max=25, message='Ingrese un nombre valido!')
+	])

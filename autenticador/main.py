@@ -6,7 +6,7 @@ import itertools
 
 from config import DevelopmentConfig
 from models import db
-from models import User,Rol,UserRol
+from models import User, Rol, UserRol, Service
 
 import json
 import forms
@@ -35,7 +35,7 @@ def consulta(sql):
 
 @app.before_request
 def before_request():
-	if 'username' not in session and request.endpoint in ['editar','create','dashboard']:
+	if 'username' not in session and request.endpoint in ['editar','create','dashboard','createService']:
 		error_message= 'Necesita autenticarse!'
 		flash(error_message)
 		return redirect(url_for('login'))
@@ -43,7 +43,7 @@ def before_request():
 	if 'username' in session and request.endpoint in ['login']:
 		return redirect(url_for('index'))
 
-	if 'username' in session and request.endpoint in ['create'] and session['rol'] != 'ADMINISTRADOR':
+	if 'username' in session and request.endpoint in ['create','createService'] and session['rol'] != 'ADMINISTRADOR':
 	    return redirect(url_for('index'))
 
 
@@ -183,6 +183,19 @@ def create():
 		success_message = 'Usuario registrado en la base de datos'
 		flash(success_message)
 	return render_template('create.html', form=create_form)
+
+@app.route('/createService', methods=['GET', 'POST'])
+def createService():
+	createService_form = forms.CreateServiceForm(request.form)
+	if request.method == 'POST' and createService_form.validate():
+
+         service = Service(createService_form.name.data)
+         db.session.add(service)
+         db.session.commit()
+
+         success_message = 'Servicio registrado!'
+         flash(success_message)
+	return render_template('createService.html', form= createService_form)
 
 @app.errorhandler(404)
 def page_not_found(e):

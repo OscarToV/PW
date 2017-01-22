@@ -38,6 +38,9 @@ class Service(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(60))
 
+    def __init__(self, name):
+        self.name = name
+
 class UserRol(db.Model):
     __tablename__ = 'userrol'
     id = db.Column(db.Integer(), primary_key=True)
