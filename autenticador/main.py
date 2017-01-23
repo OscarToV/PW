@@ -35,7 +35,7 @@ def consulta(sql):
 
 @app.before_request
 def before_request():
-	if 'username' not in session and request.endpoint in ['editar','create','dashboard','createService']:
+	if 'username' not in session and request.endpoint in ['editar','create','dashboard','createService','createRol','asignaRol']:
 		error_message= 'Necesita autenticarse!'
 		flash(error_message)
 		return redirect(url_for('login'))
@@ -43,7 +43,7 @@ def before_request():
 	if 'username' in session and request.endpoint in ['login']:
 		return redirect(url_for('index'))
 
-	if 'username' in session and request.endpoint in ['create','createService'] and session['rol'] != 'ADMINISTRADOR':
+	if 'username' in session and request.endpoint in ['create','createService','createRol','asignaRol'] and session['rol'] != 'ADMINISTRADOR':
 	    return redirect(url_for('index'))
 
 
@@ -174,8 +174,10 @@ def create():
 	if request.method == 'POST' and create_form.validate():
 
 		user = User(create_form.username.data,
-					create_form.password.data,
-					create_form.email.data)
+                    create_form.first_name.data,
+                    create_form.last_name.data,
+					create_form.email.data,
+                    create_form.password.data)
 
 		db.session.add(user)
 		db.session.commit()
@@ -196,6 +198,26 @@ def createService():
          success_message = 'Servicio registrado!'
          flash(success_message)
 	return render_template('createService.html', form= createService_form)
+
+@app.route('/createRol', methods=['GET','POST'])
+def createRol():
+    createRol_form = forms.CreateRolForm(request.form)
+    if request.method == 'POST' and createRol_form.validate():
+
+        rol = Rol(createRol_form.name.data,createRol_form.code.data)
+        db.session.add(rol)
+        db.session.commit()
+        success_message = 'Rol registrado!'
+        flash(success_message)
+    return render_template('createRol.html', form= createRol_form)
+
+@app.route('/asignaRol',methods=['GET','POST'])
+def asignaRol():
+    asignaRol_form = forms.AsignaRol(request.form)
+    if request.method == 'POST':
+        rol = asignaRol_form.rolNuevo.data
+        print rol
+    return render_template('asignaRol.html', form =asignaRol_form)
 
 @app.errorhandler(404)
 def page_not_found(e):

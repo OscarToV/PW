@@ -1,31 +1,29 @@
 {% extends 'base/base.html' %}
-{% block title %}Editar datos{% endblock %}
+{% block title %}Crear Rol{% endblock %}
 
 {% block content %}
   {% from "_macro.html" import render_field %}
-  <h2>Editar Datos de la cuenta</h2>
+  <h2>Crear Rol</h2>
   <div class="container">
     <div class="row">
       <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
 
         <br>
         <br>
-        <form name="sentMessage" id="editForm" method="POST">
+        <form  id="rolForm" method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="row control-group">
             <div class="form-group col-xs-12 floating-label-form-group controls">
-              {{ render_field(form.username, class='form-control', placeholder='Username') }}
+              {{ render_field(form.name, class='form-control') }}
               <p class="help-block text-danger"></p>
             </div>
           </div>
-
           <div class="row control-group">
             <div class="form-group col-xs-12 floating-label-form-group controls">
-              {{ render_field(form.email, class='form-control', placeholder='algo@gmail.com') }}
+              {{ render_field(form.code, class='form-control') }}
               <p class="help-block text-danger"></p>
             </div>
           </div>
-
           {{form.honneypot}}
           <br>
           <div id="success"></div>
