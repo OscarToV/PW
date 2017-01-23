@@ -41,18 +41,20 @@ class CreateForm(Form):
 						])
 	password = PasswordField('Password', [validators.Required(message='El password es requerido')])
 
+	last_name = TextField('Apellido',
+       [
+       validators.Required(message='El apellido es requerido'),
+       validators.length(min=3, max=50, message='Ingrese un apellido valido')
+       ])
+
 	first_name = TextField('Nombre',
                       [
 						  validators.Required(message = 'El nombre es requerido'),
 						  validators.length(min=2, max=50, message='Ingrese un nombre valido')
 					  ])
 
-	last_name = TextField('Apellido',
-                        [
-  						  validators.Required(message = 'El apellido es requerido'),
-  						  validators.length(min=3, max=50, message='Ingrese un apellido valido')
-  					  ])
 
+	rol = SelectField('Rol', choices=[('1','ADMINISTRADOR'),('2','USUARIO')])
 
 	def validate_username (form, field):
 		username = field.data

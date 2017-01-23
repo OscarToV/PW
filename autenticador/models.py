@@ -22,7 +22,7 @@ class User(db.Model):
         self.last_name = last_name
         self.email = email
         self.password = self.__create_password(password)
-        
+
 
     def __create_password(self, password):
         return generate_password_hash(password)
@@ -61,3 +61,8 @@ class UserRol(db.Model):
     finished_at = db.Column(db.DateTime, default=None)
     finished_reason = db.Column(db.Text())
     comment = db.Column(db.Text())
+
+    def __init__(self, rol_id, user_id, started_by):
+        self.rol_id = rol_id
+        self.user_id = user_id
+        self.started_by = started_by

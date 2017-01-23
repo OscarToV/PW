@@ -170,21 +170,30 @@ def editar():
 
 @app.route('/create', methods=['GET','POST'])
 def create():
-	create_form = forms.CreateForm(request.form)
-	if request.method == 'POST' and create_form.validate():
+   create_form = forms.CreateForm(request.form)
+   if request.method == 'POST' and create_form.validate():
 
-		user = User(create_form.username.data,
+       user = User(create_form.username.data,
                     create_form.first_name.data,
                     create_form.last_name.data,
 					create_form.email.data,
                     create_form.password.data)
 
-		db.session.add(user)
-		db.session.commit()
+       username = create_form.username.data
 
-		success_message = 'Usuario registrado en la base de datos'
-		flash(success_message)
-	return render_template('create.html', form=create_form)
+       db.session.add(user)
+       db.session.commit()
+       nu = User.query.filter_by(username = username).first()
+       ur = UserRol(create_form.rol.data, nu.id, session['username'])
+
+       db.session.add(ur)
+       db.session.commit()
+
+       success_message = 'Usuario registrado en la base de datos'
+       flash(success_message)
+
+   return render_template('create.html', form=create_form)
+
 
 @app.route('/createService', methods=['GET', 'POST'])
 def createService():
