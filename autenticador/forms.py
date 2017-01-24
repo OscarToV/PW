@@ -83,3 +83,16 @@ class CreateRolForm(Form):
 class AsignaRol(Form):
 	username = SelectField('Usuario', choices=[('Oscar','Oscar'),('Yesme', 'Yesme')])
 	rolNuevo= SelectField('Roles', choices=[('1','ADMINISTRADOR'),('2','USUARIO')])
+
+
+class CreateSAForm(Form):
+   username = StringField('Username',[
+       validators.Required(message = 'El nombre es requerido!'),
+	   validators.length(min=4, max=50, message='Ingrese un username valido')
+   ])
+
+   password = PasswordField('Password', [validators.Required(message='El password es requerido!')])
+
+   hint = StringField('tip',[validators.Required(message='Este campo es obligatorio')])
+
+   service = SelectField('Servicio', choices = [('1','FTP'),('2','Correo')])

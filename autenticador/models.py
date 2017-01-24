@@ -66,3 +66,35 @@ class UserRol(db.Model):
         self.rol_id = rol_id
         self.user_id = user_id
         self.started_by = started_by
+
+class UserService(db.Model):
+    __tablename__ = 'userservice'
+    id = db.Column(db.Integer(),primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    service_id = db.Column(db.Integer, db.ForeignKey('services.id'))
+    username = db.Column(db.String(50), unique=True)
+    password = db.Column(db.String(66))
+    hint = db.Column(db.String(20))
+
+    def __init__(self, user_id, service_id, username, password, hint):
+        self.user_id = user_id
+        self.service_id = service_id
+        self.username = username
+        self.password = self.__create_password(password)
+        self.hint = hint
+
+    def __create_password(self,password):
+        return generate_password_hash(password)
+
+    def verify_password(self, password):
+        return check_password_hash(self.password, password)
+
+class Session(db.Model):
+    __tablename__='sessions'
+    id = db.Column(db.Integer(), primary_key=True)
+    sid = db.Column(db.String(32), unique=True)
+    email = db.Column(db.String(40))
+    rol = db.Column(db.String(60))
+    created_at = db.Column(db.DateTime, default = datetime.datetime.now)
+    closed_at = db.Column(db.DateTime)
+    duration = db.Column(db.Integer)

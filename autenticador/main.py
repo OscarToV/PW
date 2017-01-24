@@ -1,13 +1,15 @@
 from flask import Flask,request,render_template,jsonify
 from flask import make_response,session,redirect,url_for,flash,g
-from flask_wtf import CsrfProtect
+from flask_wtf import CSRFProtect
 from flaskext.mysql import MySQL
 from flask_bootstrap import Bootstrap
+from flask_uuid import FlaskUUID
 import itertools
+import uuid
 
 from config import DevelopmentConfig
 from models import db
-from models import User, Rol, UserRol, Service
+from models import User, Rol, UserRol, Service, UserService
 
 import json
 import forms
@@ -16,9 +18,10 @@ app = Flask(__name__) #nuevo objeto
 app.config.from_object(DevelopmentConfig)
 mysql = MySQL()
 mysql.init_app(app)
+FlaskUUID(app)
 Bootstrap(app)
 
-csrf = CsrfProtect()
+csrf = CSRFProtect()
 
 
 def dictfetchall(cursor):
@@ -37,7 +40,7 @@ def consulta(sql):
 
 @app.before_request
 def before_request():
-	if 'username' not in session and request.endpoint in ['editar','create','dashboard','createService','createRol','asignaRol']:
+	if 'username' not in session and request.endpoint in ['editar','create','dashboard','createService','createRol','asignaRol','createSA']:
 		error_message= 'Necesita autenticarse!'
 		flash(error_message)
 		return redirect(url_for('login'))
@@ -104,10 +107,10 @@ def listaS():
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
 	login_form = forms.LoginForm(request.form)
+
 	if request.method == 'POST' and login_form.validate():
 		username = login_form.username.data
 		password = login_form.password.data
-
 		user = User.query.filter_by(username = username).first()
 		#rol = consulta('SELECT code AS rol FROM users JOIN userrol ON userrol.id = users.id JOIN roles ON userrol.id = roles.id WHERE users.id={}'.format(user.id))
 		rol = Rol.query.join(UserRol, User).add_columns(Rol.code).filter_by(id=user.id).first()
@@ -118,6 +121,7 @@ def login():
 			session['username'] = username
 			session['user_id'] = user.id
 			session['rol'] = rol.code
+			session['uuid'] = uuid.uuid4()
 			email = user.email
 			if rol.code == 'ADMINISTRADOR':
 				return redirect(url_for('index'))
@@ -127,7 +131,6 @@ def login():
 		else:
 			error_message= 'Usuario o password no validos!'
 			flash(error_message)
-
 	return render_template('login.html', form = login_form)
 
 @app.route('/logout')
@@ -154,7 +157,7 @@ def editar():
         user.username = edit_form.username.data
         user.email = edit_form.email.data
 
-        db.session.commit()
+
 
         success_message = 'Cambios realizados!'
         flash(success_message)
@@ -229,6 +232,23 @@ def asignaRol():
         rol = asignaRol_form.rolNuevo.data
         print rol
     return render_template('asignaRol.html', form =asignaRol_form)
+
+@app.route('/createSA', methods=['GET','POST'])
+def createSA():
+	createSA_form = forms.CreateSAForm(request.form)
+	if request.method == 'POST' and createSA_form.validate():
+
+		userservice =  UserService(session['user_id'],
+		                           createSA_form.service.data,
+                                   createSA_form.username.data,
+							       createSA_form.password.data,
+							       createSA_form.hint.data)
+
+		db.session.add(userservice)
+		db.session.commit()
+		success_message = 'Servicio de autenticacion creado'
+		flash(success_message)
+	return render_template('createSA.html', form=createSA_form)
 
 @app.errorhandler(404)
 def page_not_found(e):
