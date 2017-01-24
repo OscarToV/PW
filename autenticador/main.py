@@ -2,6 +2,7 @@ from flask import Flask,request,render_template,jsonify
 from flask import make_response,session,redirect,url_for,flash,g
 from flask_wtf import CsrfProtect
 from flaskext.mysql import MySQL
+from flask_bootstrap import Bootstrap
 import itertools
 
 from config import DevelopmentConfig
@@ -15,6 +16,7 @@ app = Flask(__name__) #nuevo objeto
 app.config.from_object(DevelopmentConfig)
 mysql = MySQL()
 mysql.init_app(app)
+Bootstrap(app)
 
 csrf = CsrfProtect()
 

@@ -10,3 +10,4 @@ class DevelopmentConfig(Config):
     MYSQL_DATABASE_PASSWORD = ''
     MYSQL_DATABASE_DB = 'flask'
     MYSQL_DATABASE_HOST= 'localhost'
+    BOOTSTRAP_SERVE_LOCAL = True
