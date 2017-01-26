@@ -92,9 +92,29 @@ class UserService(db.Model):
 class Session(db.Model):
     __tablename__='sessions'
     id = db.Column(db.Integer(), primary_key=True)
-    sid = db.Column(db.String(32), unique=True)
+    sid = db.Column(db.String(36), unique=True)
     email = db.Column(db.String(40))
     rol = db.Column(db.String(60))
-    created_at = db.Column(db.DateTime, default = datetime.datetime.now)
+    created_at = db.Column(db.DateTime)
     closed_at = db.Column(db.DateTime)
     duration = db.Column(db.Integer)
+
+    def __init__(self,sid,email,rol,created_at,closed_at):
+        self.sid = sid
+        self.email = email
+        self.rol = rol
+        self.created_at = created_at
+        self.closed_at = closed_at
+        self.duration = self.__calcula_duracion(created_at, closed_at)
+
+    def __calcula_duracion(self, ti, tf):
+        t1 = ti.time()
+        t2 = tf.time()
+
+        h1 = t1.hour
+        m1 = t1.minute
+
+        h2 = t2.hour
+        m2 = t2.minute
+
+        return (h2*60+m2)-(h1*60 + m1)

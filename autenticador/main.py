@@ -6,15 +6,16 @@ from flask_bootstrap import Bootstrap
 from flask_uuid import FlaskUUID
 import itertools
 import uuid
+import datetime
 
 from config import DevelopmentConfig
 from models import db
-from models import User, Rol, UserRol, Service, UserService
+from models import User, Rol, UserRol, Service, UserService, Session
 
 import json
 import forms
 
-app = Flask(__name__) #nuevo objeto
+app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 mysql = MySQL()
 mysql.init_app(app)
@@ -52,18 +53,8 @@ def before_request():
 	    return redirect(url_for('index'))
 
 
-
-
-# @app.after_request
-# def after_request(response):
-#     print g.test
-#     return response
-
 @app.route('/')
 def index():
-	#print g.test
-	#custome_cookie = request.cookies.get('custome_cookie','Undefined')
-	#print custome_cookie
 	if 'username' in session:
 		username = session['username']
 		print username
@@ -118,15 +109,17 @@ def login():
 			success_message = 'Bienvenido {}'.format(username)
 			flash(success_message)
 
+			session['Finicio'] = datetime.datetime.now()
 			session['username'] = username
 			session['user_id'] = user.id
 			session['rol'] = rol.code
-			session['uuid'] = uuid.uuid4()
-			email = user.email
+			session['sid'] = uuid.uuid4()
+			session['email'] = user.email
+
 			if rol.code == 'ADMINISTRADOR':
 				return redirect(url_for('index'))
 			else:
-				return render_template('dashboard.html', username = username, email = email)
+				return render_template('dashboard.html', username = username, email = user.email)
 
 		else:
 			error_message= 'Usuario o password no validos!'
@@ -136,16 +129,21 @@ def login():
 @app.route('/logout')
 def logout():
 	if 'username' in session:
-		session.pop('username')
-		session.pop('user_id')
-		session.pop('rol')
-	return redirect(url_for('login'))
+		Ftermina = datetime.datetime.now()
 
-@app.route('/cookie')
-def cookie():
-	response = make_response( render_template('cookie.html') )
-	response.set_cookie('custome_cookie','Oscar')
-	return response
+
+        s = Session(session['sid'], session['email'], session['rol'],
+		session['Finicio'], Ftermina)
+        db.session.add(s)
+        db.session.commit()
+
+        session.pop('username')
+        session.pop('user_id')
+        session.pop('rol')
+        session.pop('Finicio')
+        session.pop('sid')
+        session.pop('email')
+	return redirect(url_for('login'))
 
 @app.route('/editar', methods=['GET','POST'])
 def editar():
@@ -172,6 +170,29 @@ def editar():
 #     username = request.form['username']
 #     response = {'status':200,'username':username, 'id':1}
 #     return json.dumps(response)
+
+@app.route('/register',methods=['GET','POST'])
+def register():
+	register_form = forms.RegisterForm(request.form)
+	if request.method == 'POST' and register_form.validate():
+		user = User(register_form.username.data,
+		            register_form.first_name.data,
+					register_form.last_name.data,
+					register_form.email.data,
+					register_form.password.data)
+
+		username = register_form.username.data
+		db.session.add(user)
+		db.session.commit()
+
+		nu = User.query.filter_by(username = username).first()
+		ur = UserRol(2,nu.id, username)
+		db.session.add(ur)
+		db.session.commit()
+
+		success_message = 'Usuario registrado'
+		flash(success_message)
+	return render_template('register.html', form = register_form)
 
 @app.route('/create', methods=['GET','POST'])
 def create():

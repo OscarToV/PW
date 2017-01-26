@@ -96,3 +96,29 @@ class CreateSAForm(Form):
    hint = StringField('tip',[validators.Required(message='Este campo es obligatorio')])
 
    service = SelectField('Servicio', choices = [('1','FTP'),('2','Correo')])
+
+
+class RegisterForm(Form):
+	username = TextField('Username',
+						[
+							validators.Required(message = 'El username es requerido'),
+							validators.length(min=4, max=50, message='Ingrese un username valido')
+						])
+	email = EmailField('Correo electronico',
+						[	validators.Required(message = 'El email es requerido!.'),
+							validators.Email(message='Ingre un email valido'),
+							validators.length(min=4, max=50, message='Ingrese un email valido')
+						])
+	password = PasswordField('Password', [validators.Required(message='El password es requerido')])
+
+	last_name = TextField('Apellido',
+       [
+       validators.Required(message='El apellido es requerido'),
+       validators.length(min=3, max=50, message='Ingrese un apellido valido')
+       ])
+
+	first_name = TextField('Nombre',
+                      [
+						  validators.Required(message = 'El nombre es requerido'),
+						  validators.length(min=2, max=50, message='Ingrese un nombre valido')
+					  ])
