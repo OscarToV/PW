@@ -122,3 +122,13 @@ class RegisterForm(Form):
 						  validators.Required(message = 'El nombre es requerido'),
 						  validators.length(min=2, max=50, message='Ingrese un nombre valido')
 					  ])
+
+class SAForm(Form):
+	username = StringField('username',
+		  [
+			validators.Required(message='El username es requerido!'),
+			validators.length(min=4, max=25, message='Ingrese un username valido!')
+		  ])
+	password = PasswordField('Password',[validators.Required(message='El password es requerido')])
+
+	service = SelectField('Servicio', choices = [('1','FTP'),('2','Correo')])

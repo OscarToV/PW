@@ -271,6 +271,31 @@ def createSA():
 		flash(success_message)
 	return render_template('createSA.html', form=createSA_form)
 
+@app.route('/SA', methods=['GET','POST'])
+def SA():
+    login_SA_form = forms.SAForm(request.form)
+    if request.method == 'POST' and login_SA_form.validate():
+        username = login_SA_form.username.data
+        password = login_SA_form.password.data
+        service = login_SA_form.service.data
+        user = UserService.query.filter_by(username = username).first()
+
+        if user is not None and user.verify_password(password):
+			success_message = 'Bienvenido {}'.format(username)
+			flash(success_message)
+
+			return render_template('service.html')
+
+        else:
+			error_message = 'Datos incorrectos!... Pista:  {}'.format(user.hint)
+			flash(error_message)
+
+    return render_template('SA.html', form = login_SA_form)
+
+@app.route('/consultor')
+def consultor():
+	pass
+
 @app.errorhandler(404)
 def page_not_found(e):
 	return render_template('404.html')
