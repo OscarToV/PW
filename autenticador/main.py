@@ -46,8 +46,8 @@ def before_request():
 		flash(error_message)
 		return redirect(url_for('login'))
 
-	if 'username' in session and request.endpoint in ['login']:
-		return redirect(url_for('index'))
+	if 'username' in session and request.endpoint in ['login','register']:
+		return redirect(url_for('dashboard'))
 
 	if 'username' in session and request.endpoint in ['create','createService','createRol','asignaRol'] and session['rol'] != 'ADMINISTRADOR':
 	    return redirect(url_for('index'))
@@ -64,7 +64,7 @@ def index():
 def dashboard():
     user = User.query.filter_by(username = session['username']).first()
 
-    return render_template('dashboard.html', username = username,
+    return render_template('dashboard.html', username = session['username'],
 		   email = user.email, nombre = user.first_name,
 		   apellido = user.last_name, rol = session['rol'])
 
