@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, TextField, validators, HiddenField, PasswordField, SelectField
+from wtforms import Form, StringField, TextField, validators, HiddenField,PasswordField, SelectField
 from wtforms.fields.html5 import EmailField
 from models import User
 
@@ -7,6 +7,7 @@ def length_honneypot(form, field):
 		raise validators.ValidationError('El campo debe estar vacio.')
 
 class EditForm(Form):
+
 	username = StringField('username',
 			   [
 				 validators.Required(message='El username es requerido!'),

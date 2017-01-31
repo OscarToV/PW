@@ -1,0 +1,11 @@
+{% extends 'base/base.html'%}
+
+{% block title %}
+		Consulta
+{% endblock %}
+
+{% block content %}
+	{{ for resultado in resultados }}
+        <li>resultado</li>
+    {{% endfor %}}
+{% endblock %}

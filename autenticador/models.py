@@ -118,3 +118,15 @@ class Session(db.Model):
         m2 = t2.minute
 
         return (h2*60+m2)-(h1*60 + m1)
+
+class Query(db.Model):
+    id = db.Column(db.Integer(), primary_key = True)
+    name = db.Column(db.String(60), unique=True)
+    description = db.Column(db.Text())
+    sql = db.Column(db.Text())
+    created_at = db.Column(db.DateTime, default = datetime.datetime.now)
+
+    def __init__(self, name, description, sql):
+        self.name = name
+        self.description = description
+        self.sql = sql

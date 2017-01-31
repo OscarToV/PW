@@ -10,7 +10,7 @@ import datetime
 
 from config import DevelopmentConfig
 from models import db
-from models import User, Rol, UserRol, Service, UserService, Session
+from models import User, Rol, UserRol, Service, UserService, Session, Query
 
 import json
 import forms
@@ -64,7 +64,9 @@ def index():
 def dashboard():
     user = User.query.filter_by(username = session['username']).first()
 
-    return render_template('dashboard.html', username=user.username, email = user.email)
+    return render_template('dashboard.html', username = username,
+		   email = user.email, nombre = user.first_name,
+		   apellido = user.last_name, rol = session['rol'])
 
 
 @app.route('/user')
@@ -79,6 +81,13 @@ def listaU():
 	results = dictfetchall(cursor)
 	return jsonify(datos=results)
 
+@app.route('/auth/<username>/<password>/<service>')
+def autenticacion(username, password, service):
+    user = UserService.query.filter_by(username = username).first()
+    if user is not None and user.verify_password(password):
+        return 'True'
+    else:
+	    return 'False'
 
 @app.route('/rol')
 def listaR():
@@ -116,10 +125,10 @@ def login():
 			session['sid'] = uuid.uuid4()
 			session['email'] = user.email
 
-			if rol.code == 'ADMINISTRADOR':
-				return redirect(url_for('index'))
-			else:
-				return render_template('dashboard.html', username = username, email = user.email)
+
+			return render_template('dashboard.html', username = username,
+				       email = user.email, nombre = user.first_name,
+					   apellido = user.last_name, rol = session['rol'])
 
 		else:
 			error_message= 'Usuario o password no validos!'
@@ -155,6 +164,8 @@ def editar():
         user.username = edit_form.username.data
         user.email = edit_form.email.data
 
+        db.session.add(user)
+        db.session.commit()
 
 
         success_message = 'Cambios realizados!'
@@ -164,12 +175,6 @@ def editar():
 
     return render_template('editar.html', form = edit_form)
 
-# @app.route('/ajax-login', methods=['POST'])
-# def ajax_login():
-#     print request.form
-#     username = request.form['username']
-#     response = {'status':200,'username':username, 'id':1}
-#     return json.dumps(response)
 
 @app.route('/register',methods=['GET','POST'])
 def register():
@@ -292,9 +297,17 @@ def SA():
 
     return render_template('SA.html', form = login_SA_form)
 
-@app.route('/consultor')
-def consultor():
-	pass
+@app.route('/query/<name>')
+def consultor(name):
+    consul = Query.query.filter_by(name= name).first()
+    cursor = consulta(consul.sql)
+    results = dictfetchall(cursor)
+
+    return jsonify(datos=results)
+
+
+
+
 
 @app.errorhandler(404)
 def page_not_found(e):
