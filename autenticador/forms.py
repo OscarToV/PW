@@ -201,3 +201,10 @@ class RevocaRol(Form):
 	comentario = TextAreaField('Cometario')
 
 	honneypot = HiddenField('',[length_honneypot])
+
+class Busqueda(Form):
+	email = EmailField('',
+			[
+			  validators.Required(message='El email es requerido!'),
+			  validators.Email(message='Ingrese un email valido!')
+			])

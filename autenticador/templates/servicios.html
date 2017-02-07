@@ -1,0 +1,36 @@
+{% extends 'base/base.html'%}
+
+{% block title %}
+	Servicios
+{% endblock %}
+
+{% block body %}
+
+<ul class="nav nav-pills  nav-stacked">
+    <li role="presentation" class="active"><a href="#"><h3>Servicios</h3></a></li>
+</ul>
+<br><br><br><br>
+   <div class="container">
+        <table class="table table-bordered table-inverse">
+            <thead>
+            <tr>
+             <th>id</th>
+             <th>name</th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                   <tr>
+                     <td>{{ service.id }}</td>
+                     <td>{{ service.name }}</td>
+                   </tr>
+               {% endfor %}
+           </tbody>
+        </table>
+    </div>
+    <br><br>
+    <div class="container">
+      <a class="btn btn-default" href="{{url_for('index')}}">Regresar</a>
+    </div>
+
+{% endblock %}

@@ -55,10 +55,8 @@ def before_request():
 
 @app.route('/')
 def index():
-	if 'username' in session:
-		username = session['username']
-		print username
-	return render_template('index.html')
+	busqueda_form = forms.Busqueda(request.form)
+	return render_template('index.html', form = busqueda_form)
 
 @app.route('/dashboard')
 def dashboard():
@@ -79,15 +77,21 @@ def dashboardAdmin():
 
 @app.route('/user')
 def listaU():
-	param = request.args.get('email',None)
+	users=Rol.query.join(UserRol, User).add_columns(Rol.code, User.id,
+	                      User.username,User.email, User.created_date).all()
+	return render_template('usuarios.html', users = users)
 
-	if param is None:
-		cursor = consulta('SELECT username,email,created_date,code AS rol FROM users LEFT JOIN userrol ON userrol.user_id = users.id JOIN roles ON userrol.rol_id = roles.id')
-	else:
-		cursor = consulta("SELECT username,email,created_date,code AS rol FROM users LEFT JOIN userrol ON userrol.user_id = users.id JOIN roles ON userrol.rol_id = roles.id WHERE email = '{}'".format(param))
+@app.route('/userEmail', methods =['GET','POST'])
+def userEmail():
+    busqueda_form = forms.Busqueda(request.form)
+    if request.method == 'POST' and busqueda_form.validate():
+		email = busqueda_form.email.data
+		user=Rol.query.join(UserRol, User).add_columns(Rol.code, User.id,
+		                  User.username,User.email, User.created_date).\
+						  filter_by(email = email)
+		return render_template('usuarios.html', users = user)
+    return redirect(url_for('index'))
 
-	results = dictfetchall(cursor)
-	return jsonify(datos=results)
 
 @app.route('/auth/<username>/<password>/<service>')
 def autenticacion(username, password, service):
@@ -99,17 +103,14 @@ def autenticacion(username, password, service):
 
 @app.route('/rol')
 def listaR():
-	sql = 'SELECT * FROM roles'
-	cursor = consulta(sql)
-	results = dictfetchall(cursor)
-	return jsonify(datos=results)
+	roles = Rol.query.all()
+	return render_template('roles.html', roles = roles)
+
 
 @app.route('/service')
 def listaS():
-	sql = 'SELECT * FROM services'
-	cursor = consulta(sql)
-	results = dictfetchall(cursor)
-	return jsonify(datos=results)
+	services = Service.query.all()
+	return render_template('servicios.html', services = services)
 
 
 @app.route('/login', methods = ['GET', 'POST'])
