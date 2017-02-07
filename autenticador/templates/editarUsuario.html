@@ -1,10 +1,10 @@
 {% extends 'base/base.html' %}
-{% block title %}Asigna Rol{% endblock %}
+{% block title %}Editar datos{% endblock %}
 
 {% block content %}
   {% from "_macro.html" import render_field %}
   <ul class="nav nav-pills  nav-stacked">
-      <li role="presentation" class="active"><a href="#"><h3>Asigna Rol</h3></a></li>
+      <li role="presentation" class="active"><a href="#"><h3>Editar datos de la cuenta</h3></a></li>
   </ul>
   <div class="container">
     <div class="row">
@@ -12,7 +12,7 @@
 
         <br>
         <br>
-        <form  id="asigRolForm" method="POST", action = 'asignaRol'>
+        <form name="sentMessage" id="editForm" method="POST" action="editarUsuario">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="row control-group">
             <div class="form-group col-xs-12 floating-label-form-group controls">
@@ -20,12 +20,28 @@
               <p class="help-block text-danger"></p>
             </div>
           </div>
+
           <div class="row control-group">
             <div class="form-group col-xs-12 floating-label-form-group controls">
-              {{ render_field(form.rol, class='form-control') }}
+              {{ render_field(form.email, class='form-control', value=email) }}
               <p class="help-block text-danger"></p>
             </div>
           </div>
+
+          <div class="row control-group">
+            <div class="form-group col-xs-12 floating-label-form-group controls">
+              {{ render_field(form.first_name, class='form-control', value = nombre) }}
+              <p class="help-block text-danger"></p>
+            </div>
+          </div>
+
+          <div class="row control-group">
+            <div class="form-group col-xs-12 floating-label-form-group controls">
+              {{ render_field(form.last_name, class='form-control', value = apellido) }}
+              <p class="help-block text-danger"></p>
+            </div>
+          </div>
+
           {{form.honneypot}}
           <br>
           <div id="success"></div>

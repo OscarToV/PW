@@ -1,0 +1,73 @@
+{% extends 'base/base.html'%}
+
+{% block title %}
+	Administrador
+{% endblock %}
+
+{% block content %}
+
+<nav class="navbar navbar-default">
+<div class="container-fluid">
+
+<div class="navbar-header">
+  <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+  <a class="navbar-brand" href="#">Autenticador</a>
+</div>
+
+<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+  <ul class="nav navbar-nav">
+    <li class="active"><a href="{{url_for('dashboardAdmin')}}">Dashboard <span class="sr-only">(current)</span></a></li>
+
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Usuarios <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a href="/create">Crear usuario </a></li>
+        <li><a href="/buscarUsuario">editar usuario </a></li>
+        <li><a href="#">eliminar usuario </a></li>
+      </ul>
+    </li>
+
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Servicios <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a href="/createService">Crear servicio </a></li>
+        <li><a href="#">Editar servicio </a></li>
+        <li><a href="#">Eliminar servicio </a></li>
+      </ul>
+    </li>
+
+    <li class="dropdown">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Roles <span class="caret"></span></a>
+      <ul class="dropdown-menu">
+        <li><a href="/createRol">Crear rol </a></li>
+        <li><a href="/buscarRol">Editar rol </a></li>
+        <li><a href="/buscarUsuarioRol">Revocar rol </a></li>
+		<li><a href="/buscarUsuarioRol2">Asignar rol </a></li>
+      </ul>
+    </li>
+  </ul>
+  <ul class="nav navbar-nav navbar-right">
+    <li role="presentation" class="active"><a href="/logout">logout</a></li>
+  </ul>
+</div>
+</div>
+</nav>
+<br><br><br><br>
+  <div class="container">
+	  <div class="list-group">
+		  <a href="#" class="list-group-item active">
+		    Datos de la cuenta
+		  </a>
+		  <a href="#" class="list-group-item"> Username: {{ username }} </a>
+		  <a href="#" class="list-group-item"> Email: {{ email }} </a>
+		  <a href="#" class="list-group-item"> Nombre: {{ nombre }} </a>
+		  <a href="#" class="list-group-item"> Apellido: {{ apellido }} </a>
+		  <a href="#" class="list-group-item"> Rol : {{ rol }} </a>
+	 </div>
+ </div>
+{% endblock %}

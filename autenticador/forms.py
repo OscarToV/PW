@@ -1,4 +1,4 @@
-from wtforms import Form, StringField, TextField, validators, HiddenField,PasswordField, SelectField
+from wtforms import Form, StringField, TextField, validators, HiddenField,PasswordField, SelectField, TextAreaField
 from wtforms.fields.html5 import EmailField
 from models import User
 
@@ -12,12 +12,23 @@ class EditForm(Form):
 			   [
 				 validators.Required(message='El username es requerido!'),
 				 validators.length(min=4, max=25, message='Ingrese username valido!')
-			   ])
+               ])
 	email = EmailField('Correo electronico',
 			[
 			  validators.Required(message='El email es requerido!'),
 			  validators.Email(message='Ingrese un email valido!')
 			])
+	first_name = StringField('nombre',
+			   [
+				 validators.Required(message='El nombre es requerido!'),
+				 validators.length(min=4, max=25, message='Ingrese nombre valido!')
+	           ])
+	last_name = StringField('apellido',
+	           [
+				 validators.Required(message='El apellido es requerido!'),
+				 validators.length(min=4, max=25, message='Ingrese apellido valido!')
+			   ])
+
 	honneypot = HiddenField('',[length_honneypot])
 
 class LoginForm(Form):
@@ -67,7 +78,7 @@ class CreateServiceForm(Form):
     name = StringField('name',[
 	    validators.Required(message='El nombre es requerido!'),
 		validators.length(min=3, max=25, message='Ingrese un nombre valido!')
-	], default="FTP")
+	])
 
 
 class CreateRolForm(Form):
@@ -82,8 +93,8 @@ class CreateRolForm(Form):
 	])
 
 class AsignaRol(Form):
-	username = SelectField('Usuario', choices=[('Oscar','Oscar'),('Yesme', 'Yesme')])
-	rolNuevo= SelectField('Roles', choices=[('1','ADMINISTRADOR'),('2','USUARIO')])
+	username = StringField('Usuario', [validators.Required(message='Este campo es obligatorio')])
+	rol= SelectField('Roles', choices=[('1','ADMINISTRADOR'),('2','USUARIO'),('3','INVITADO')])
 
 
 class CreateSAForm(Form):
@@ -133,3 +144,60 @@ class SAForm(Form):
 	password = PasswordField('Password',[validators.Required(message='El password es requerido')])
 
 	service = SelectField('Servicio', choices = [('1','FTP'),('2','Correo')])
+
+
+class BuscaRol(Form):
+	rol = SelectField('Rol', choices=[('1','Administrador'),('2','Usuario')])
+
+
+class EditaRol(Form):
+	name = StringField('nombre',[validators.Required(message='El nombre es requerido!')])
+	code = StringField('codigo',[validators.Required(message='El codigo es requerido!')])
+
+class BuscaUsuario(Form):
+	username = SelectField('Usuario', choices = [('1','Oskar'),('2','chesmin'),('3','arti')])
+
+class EditaUsuario(Form):
+
+	username = StringField('username',
+			   [
+				 validators.Required(message='El username es requerido!'),
+				 validators.length(min=4, max=25, message='Ingrese username valido!')
+               ])
+	email = EmailField('Correo electronico',
+			[
+			  validators.Required(message='El email es requerido!'),
+			  validators.Email(message='Ingrese un email valido!')
+			])
+	first_name = StringField('nombre',
+			   [
+				 validators.Required(message='El nombre es requerido!'),
+				 validators.length(min=4, max=25, message='Ingrese nombre valido!')
+	           ])
+	last_name = StringField('apellido',
+	           [
+				 validators.Required(message='El apellido es requerido!'),
+				 validators.length(min=4, max=25, message='Ingrese apellido valido!')
+			   ])
+
+	honneypot = HiddenField('',[length_honneypot])
+
+
+class RevocaRol(Form):
+
+	username = StringField('Username',
+			   [
+				 validators.Required(message='El username es requerido!'),
+				 validators.length(min=4, max=25, message='Ingrese username valido!')
+               ])
+	rol = StringField('Rol',
+			[
+			  validators.Required(message='El rol es requerido!')
+			])
+	razon = TextAreaField('Razon',
+			   [
+				 validators.Required(message='Una razon es requerida!')
+	           ])
+	comentario = TextAreaField('Cometario')
+
+	honneypot = HiddenField('',[length_honneypot])

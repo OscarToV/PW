@@ -68,6 +68,14 @@ def dashboard():
 		   email = user.email, nombre = user.first_name,
 		   apellido = user.last_name, rol = session['rol'])
 
+@app.route('/dashboardAdmin')
+def dashboardAdmin():
+    user = User.query.filter_by(username = session['username']).first()
+
+    return render_template('dashboardAdmin.html', username = session['username'],
+		   email = user.email, nombre = user.first_name,
+		   apellido = user.last_name, rol = session['rol'])
+
 
 @app.route('/user')
 def listaU():
@@ -106,34 +114,38 @@ def listaS():
 
 @app.route('/login', methods = ['GET', 'POST'])
 def login():
-	login_form = forms.LoginForm(request.form)
+    login_form = forms.LoginForm(request.form)
 
-	if request.method == 'POST' and login_form.validate():
-		username = login_form.username.data
-		password = login_form.password.data
-		user = User.query.filter_by(username = username).first()
+    if request.method == 'POST' and login_form.validate():
+        username = login_form.username.data
+        password = login_form.password.data
+        user = User.query.filter_by(username = username).first()
 		#rol = consulta('SELECT code AS rol FROM users JOIN userrol ON userrol.id = users.id JOIN roles ON userrol.id = roles.id WHERE users.id={}'.format(user.id))
-		rol = Rol.query.join(UserRol, User).add_columns(Rol.code).filter_by(id=user.id).first()
-		if user is not None and user.verify_password(password):
-			success_message = 'Bienvenido {}'.format(username)
-			flash(success_message)
+        rol = Rol.query.join(UserRol, User).add_columns(Rol.code).filter_by(id=user.id).first()
+        if user is not None and user.verify_password(password):
+            success_message = 'Bienvenido {}'.format(username)
+            flash(success_message)
 
-			session['Finicio'] = datetime.datetime.now()
-			session['username'] = username
-			session['user_id'] = user.id
-			session['rol'] = rol.code
-			session['sid'] = uuid.uuid4()
-			session['email'] = user.email
+            session['Finicio'] = datetime.datetime.now()
+            session['username'] = username
+            session['user_id'] = user.id
+            session['rol'] = rol.code
+            session['sid'] = uuid.uuid4()
+            session['email'] = user.email
 
+            if rol.code == 'ADMINISTRADOR':
+                    return render_template('dashboardAdmin.html', username = username,
+                         email = user.email, nombre = user.first_name,
+					     apellido = user.last_name, rol = session['rol'])
+            else:
+                 return render_template('dashboard.html', username = username,
+				          email = user.email, nombre = user.first_name,
+					      apellido = user.last_name, rol = session['rol'])
 
-			return render_template('dashboard.html', username = username,
-				       email = user.email, nombre = user.first_name,
-					   apellido = user.last_name, rol = session['rol'])
-
-		else:
+        else:
 			error_message= 'Usuario o password no validos!'
 			flash(error_message)
-	return render_template('login.html', form = login_form)
+    return render_template('login.html', form = login_form)
 
 @app.route('/logout')
 def logout():
@@ -152,28 +164,32 @@ def logout():
         session.pop('Finicio')
         session.pop('sid')
         session.pop('email')
-	return redirect(url_for('login'))
+	return redirect(url_for('index'))
 
 @app.route('/editar', methods=['GET','POST'])
 def editar():
-    edit_form = forms.EditForm(request.form)
+	edit_form = forms.EditForm(request.form)
+	user1 = User.query.filter_by(id=session['user_id']).first()
+	if request.method == 'POST' and edit_form.validate():
 
-    if request.method == 'POST' and edit_form.validate():
+		user = User.query.get_or_404(session['user_id'])
+		user.username = edit_form.username.data
+		user.email = edit_form.email.data
+		user.first_name = edit_form.first_name.data
+		user.last_name = edit_form.last_name.data
 
-        user = User.query.get_or_404(session['user_id'])
-        user.username = edit_form.username.data
-        user.email = edit_form.email.data
-
-        db.session.add(user)
-        db.session.commit()
+		db.session.add(user)
+		db.session.commit()
 
 
-        success_message = 'Cambios realizados!'
-        flash(success_message)
+		success_message = 'Cambios realizados!'
+		flash(success_message)
 
-        return redirect(url_for('index'))
+		return redirect(url_for('dashboard'))
 
-    return render_template('editar.html', form = edit_form)
+	return render_template('editar.html', form = edit_form,
+	                        username=session['username'],email = session['email'],
+							nombre = user1.first_name, apellido = user1.last_name)
 
 
 @app.route('/register',methods=['GET','POST'])
@@ -249,15 +265,9 @@ def createRol():
         db.session.commit()
         success_message = 'Rol registrado!'
         flash(success_message)
+        return redirect(url_for('dashboardAdmin'))
     return render_template('createRol.html', form= createRol_form)
 
-@app.route('/asignaRol',methods=['GET','POST'])
-def asignaRol():
-    asignaRol_form = forms.AsignaRol(request.form)
-    if request.method == 'POST':
-        rol = asignaRol_form.rolNuevo.data
-        print rol
-    return render_template('asignaRol.html', form =asignaRol_form)
 
 @app.route('/createSA', methods=['GET','POST'])
 def createSA():
@@ -296,6 +306,123 @@ def SA():
 			flash(error_message)
 
     return render_template('SA.html', form = login_SA_form)
+
+
+@app.route('/buscarRol', methods=['GET','POST'])
+def buscarRol():
+ 	buscaRol_form = forms.BuscaRol(request.form)
+	editaRol_form = forms.EditaRol(request.form)
+ 	if request.method == 'POST':
+ 		rol_id = buscaRol_form.rol.data
+		rol = Rol.query.filter_by(id = rol_id).first()
+		return render_template('editarRol.html', form = editaRol_form, name = rol.name, code = rol.code)
+	return render_template('buscarRol.html', form = buscaRol_form)
+
+@app.route('/editarRol', methods=['GET','POST'])
+def editarRol():
+	editaRol_form = forms.EditaRol(request.form)
+	if request.method == 'POST' and editaRol_form.validate():
+		rol1 = Rol.query.filter_by(name = editaRol_form.name.data).first()
+		rol = Rol.query.get_or_404(rol1.id)
+
+        rol.name = editaRol_form.name.data
+        rol.code = editaRol_form.code.data
+        db.session.add(rol)
+        db.session.commit()
+
+
+        success_message = 'Cambios realizados!'
+        flash(success_message)
+        return render_template('dashboardAdmin.html')
+	return redirect(url_for('buscarRol'))
+
+@app.route('/buscarUsuario', methods=['GET','POST'])
+def buscarUsuario():
+	buscaUsuario_form = forms.BuscaUsuario(request.form)
+	editarUsuario_form = forms.EditaUsuario(request.form)
+	if request.method == 'POST':
+		user = User.query.filter_by(id = buscaUsuario_form.username.data).first()
+		return render_template('editarUsuario.html', form = editarUsuario_form,username = user.username,
+		                       email = user.email, nombre = user.first_name, apellido = user.last_name)
+
+	return render_template('buscarUsuario.html', form = buscaUsuario_form)
+
+@app.route('/editarUsuario', methods = ['GET','POST'])
+def edditarUsuario():
+	editarUsuario_form = forms.EditaUsuario(request.form)
+	if request.method == 'POST' and editarUsuario_form.validate():
+		user1 = User.query.filter_by(username = editarUsuario_form.username.data).first()
+		user = User.query.get_or_404(user1.id)
+
+		user.username = editarUsuario_form.username.data
+		user.email = editarUsuario_form.email.data
+		user.first_name = editarUsuario_form.first_name.data
+		user.last_name = editarUsuario_form.last_name.data
+
+		db.session.add(user)
+		db.session.commit()
+
+		success_message = 'Cambios realizados'
+		flash(success_message)
+		return render_template('dashboardAdmin.html')
+	return redirect(url_for('buscarUsuario'))
+
+@app.route('/buscarUsuarioRol', methods=['GET','POST'])
+def buscarUsuarioRol():
+	buscaUsuario_form = forms.BuscaUsuario(request.form)
+	revocarRol_form = forms.RevocaRol(request.form)
+	if request.method == 'POST':
+		user = User.query.filter_by(id = buscaUsuario_form.username.data).first()
+		rol = Rol.query.join(UserRol, User).add_columns(Rol.code).filter_by(id=user.id).first()
+		return render_template('revocarRol.html', form = revocarRol_form,username = user.username,
+		                       rol = rol.code)
+
+	return render_template('buscarUsuario.html', form = buscaUsuario_form)
+
+@app.route('/revocarRol', methods=['GET','POST'])
+def revocarRol():
+	revocarRol_form = forms.RevocaRol(request.form)
+	if request.method == 'POST' and revocarRol_form.validate():
+		user1 = User.query.filter_by(username = revocarRol_form.username.data).first()
+		userrol1 = UserRol.query.filter_by(user_id = user1.id).first()
+		userrol = UserRol.query.get_or_404(userrol1.id)
+
+		userrol.finished_by = session['username']
+		userrol.finished_at =  datetime.datetime.now()
+		userrol.finished_reason = revocarRol_form.razon.data
+		userrol.comment = revocarRol_form.comentario.data
+
+		db.session.add(userrol)
+		db.session.commit()
+		success_message = 'Rol revocado correctamente'
+		flash(success_message)
+		return redirect (url_for('dashboardAdmin'))
+
+	return redirect(url_for('buscarUsuarioRol'))
+
+@app.route('/buscarUsuarioRol2', methods=['GET','POST'])
+def buscarUsuarioRol2():
+	buscaUsuario_form = forms.BuscaUsuario(request.form)
+	asignaRol_form = forms.AsignaRol(request.form)
+	if request.method == 'POST':
+		user = User.query.filter_by(id = buscaUsuario_form.username.data).first()
+		return render_template('asignaRol.html', form = asignaRol_form , username = user.username)
+	return render_template('buscarUsuario.html', form = buscaUsuario_form)
+
+@app.route('/asignaRol', methods =['GET','POST'])
+def asignaRol():
+	asignaRol_form = forms.AsignaRol(request.form)
+	if request.method == 'POST' and asignaRol_form.validate():
+		user = User.query.filter_by(username = asignaRol_form.username.data).first()
+		ur = UserRol(asignaRol_form.rol.data, user.id ,
+		                  session['username'])
+		db.session.add(ur)
+		db.session.commit()
+
+		success_message = 'Rol asignado'
+		flash(success_message)
+		return redirect(url_for('dashboardAdmin'))
+	return redirect(url_for('buscarUsuarioRol2'))
 
 @app.route('/query/<name>')
 def consultor(name):
