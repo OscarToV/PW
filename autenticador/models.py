@@ -13,6 +13,7 @@ class User(db.Model):
     email = db.Column(db.String(40))
     password = db.Column(db.String(66))
     created_date = db.Column(db.DateTime, default = datetime.datetime.now)
+    activo = db.Column(db.Integer)
     URol = db.relationship('UserRol')
 
 

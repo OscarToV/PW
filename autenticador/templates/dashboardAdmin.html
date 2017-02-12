@@ -4,7 +4,8 @@
 	Administrador
 {% endblock %}
 
-{% block content %}
+{% block body %}
+{{ super()}}
 
 <nav class="navbar navbar-default">
 <div class="container-fluid">
@@ -28,7 +29,7 @@
       <ul class="dropdown-menu">
         <li><a href="/create">Crear usuario </a></li>
         <li><a href="/buscarUsuario">editar usuario </a></li>
-        <li><a href="#">eliminar usuario </a></li>
+        <li><a href="/eliminarUsuario">eliminar usuario </a></li>
       </ul>
     </li>
 
@@ -36,7 +37,7 @@
       <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Servicios <span class="caret"></span></a>
       <ul class="dropdown-menu">
         <li><a href="/createService">Crear servicio </a></li>
-        <li><a href="#">Editar servicio </a></li>
+        <li><a href="/buscarServicio">Editar servicio </a></li>
         <li><a href="#">Eliminar servicio </a></li>
       </ul>
     </li>

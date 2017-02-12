@@ -208,3 +208,12 @@ class Busqueda(Form):
 			  validators.Required(message='El email es requerido!'),
 			  validators.Email(message='Ingrese un email valido!')
 			])
+
+class EliminaUsuario(Form):
+	username = SelectField('Usuario', choices = [('1','Oskar'),('2','chesmin'),('3','arti')])
+
+class BuscaServicio(Form):
+	servicio = SelectField('Servicio', choices=[('1','FTP'),('2','Correo')])
+
+class EditaServicio(Form):
+	name = StringField('nombre',[validators.Required(message='El nombre es requerido!')])

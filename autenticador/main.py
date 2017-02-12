@@ -68,9 +68,9 @@ def dashboard():
 
 @app.route('/dashboardAdmin')
 def dashboardAdmin():
-    user = User.query.filter_by(username = session['username']).first()
+	user = User.query.filter_by(username = session['username']).first()
 
-    return render_template('dashboardAdmin.html', username = session['username'],
+	return render_template('dashboardAdmin.html',username = session['username'],
 		   email = user.email, nombre = user.first_name,
 		   apellido = user.last_name, rol = session['rol'])
 
@@ -78,7 +78,7 @@ def dashboardAdmin():
 @app.route('/user')
 def listaU():
 	users=Rol.query.join(UserRol, User).add_columns(Rol.code, User.id,
-	                      User.username,User.email, User.created_date).all()
+	                      User.username,User.email, User.created_date).filter_by(activo=1).all()
 	return render_template('usuarios.html', users = users)
 
 @app.route('/userEmail', methods =['GET','POST'])
@@ -201,7 +201,7 @@ def register():
 		            register_form.first_name.data,
 					register_form.last_name.data,
 					register_form.email.data,
-					register_form.password.data)
+					register_form.password.data,1)
 
 		username = register_form.username.data
 		db.session.add(user)
@@ -225,7 +225,7 @@ def create():
                     create_form.first_name.data,
                     create_form.last_name.data,
 					create_form.email.data,
-                    create_form.password.data)
+                    create_form.password.data,1)
 
        username = create_form.username.data
 
@@ -424,6 +424,49 @@ def asignaRol():
 		flash(success_message)
 		return redirect(url_for('dashboardAdmin'))
 	return redirect(url_for('buscarUsuarioRol2'))
+
+@app.route('/eliminarUsuario', methods=['GET','POST'])
+def eliminarUsuario():
+	eliminaUsuario_form = forms.EliminaUsuario(request.form)
+	if request.method == 'POST':
+		user = User.query.get_or_404(eliminaUsuario_form.username.data)
+		user.activo = 0
+
+		db.session.add(user)
+		db.session.commit()
+
+		success_message = 'Usuario eliminado'
+		flash(success_message)
+		return redirect(url_for('dashboardAdmin'))
+	return render_template('eliminarUsuario.html', form=eliminaUsuario_form)
+
+@app.route('/buscarServicio', methods=['GET','POST'])
+def buscarServicio():
+ 	buscaServicio_form = forms.BuscaServicio(request.form)
+	editaServicio_form = forms.EditaServicio(request.form)
+ 	if request.method == 'POST':
+ 		service_id = buscaServicio_form.servicio.data
+		service = Service.query.filter_by(id = service_id).first()
+		return render_template('editarServicio.html', form = editaServicio_form, name = service.name)
+	return render_template('buscaServicio.html', form = buscaServicio_form)
+
+@app.route('/editarServicio', methods=['GET','POST'])
+def editarServicio():
+	editaServicio_form = forms.EditaServicio(request.form)
+	if request.method == 'POST' and editaServicio_form.validate():
+		service1 = Service.query.filter_by(name = editaServicio_form.name.data).first()
+		print service1.id
+		service = Service.query.get_or_404(service1.id)
+
+		service.name = editaServicio_form.name.data
+		db.session.add(service)
+		db.session.commit()
+
+		success_message = 'Cambios realizados'
+		flash(success_message)
+		return redirect(url_for('dashboardAdmin'))
+	return redirect(url_for('buscarServicio'))
+
 
 @app.route('/query/<name>')
 def consultor(name):
