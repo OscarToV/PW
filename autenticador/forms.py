@@ -155,7 +155,7 @@ class EditaRol(Form):
 	code = StringField('codigo',[validators.Required(message='El codigo es requerido!')])
 
 class BuscaUsuario(Form):
-	username = SelectField('Usuario', choices = [('1','Oskar'),('2','chesmin'),('3','arti')])
+	username = SelectField('Usuario', choices = [('1','Oskar'),('2','chesmin'),('3','arti'),('4','cocabet')])
 
 class EditaUsuario(Form):
 
@@ -181,6 +181,8 @@ class EditaUsuario(Form):
 			   ])
 
 	honneypot = HiddenField('',[length_honneypot])
+
+	idU = HiddenField('',[])
 
 
 class RevocaRol(Form):

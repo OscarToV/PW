@@ -122,8 +122,9 @@ def login():
         password = login_form.password.data
         user = User.query.filter_by(username = username).first()
 		#rol = consulta('SELECT code AS rol FROM users JOIN userrol ON userrol.id = users.id JOIN roles ON userrol.id = roles.id WHERE users.id={}'.format(user.id))
-        rol = Rol.query.join(UserRol, User).add_columns(Rol.code).filter_by(id=user.id).first()
+        
         if user is not None and user.verify_password(password):
+            rol = Rol.query.join(UserRol, User).add_columns(Rol.code).filter_by(id=user.id).first()
             success_message = 'Bienvenido {}'.format(username)
             flash(success_message)
 
@@ -285,6 +286,7 @@ def createSA():
 		db.session.commit()
 		success_message = 'Servicio de autenticacion creado'
 		flash(success_message)
+		return redirect(url_for('dashboard'))
 	return render_template('createSA.html', form=createSA_form)
 
 @app.route('/SA', methods=['GET','POST'])
@@ -344,7 +346,7 @@ def buscarUsuario():
 	if request.method == 'POST':
 		user = User.query.filter_by(id = buscaUsuario_form.username.data).first()
 		return render_template('editarUsuario.html', form = editarUsuario_form,username = user.username,
-		                       email = user.email, nombre = user.first_name, apellido = user.last_name)
+		                       email = user.email, nombre = user.first_name, apellido = user.last_name, idU = user.id)
 
 	return render_template('buscarUsuario.html', form = buscaUsuario_form)
 
@@ -352,7 +354,8 @@ def buscarUsuario():
 def edditarUsuario():
 	editarUsuario_form = forms.EditaUsuario(request.form)
 	if request.method == 'POST' and editarUsuario_form.validate():
-		user1 = User.query.filter_by(username = editarUsuario_form.username.data).first()
+		user1 = User.query.filter_by(id = editarUsuario_form.idU.data).first()
+		print user1.id
 		user = User.query.get_or_404(user1.id)
 
 		user.username = editarUsuario_form.username.data
@@ -365,7 +368,7 @@ def edditarUsuario():
 
 		success_message = 'Cambios realizados'
 		flash(success_message)
-		return render_template('dashboardAdmin.html')
+		return redirect(url_for('dashboardAdmin'))
 	return redirect(url_for('buscarUsuario'))
 
 @app.route('/buscarUsuarioRol', methods=['GET','POST'])

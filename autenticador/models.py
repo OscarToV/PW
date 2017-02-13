@@ -17,12 +17,13 @@ class User(db.Model):
     URol = db.relationship('UserRol')
 
 
-    def __init__(self, username,first_name, last_name, email, password):
+    def __init__(self, username,first_name, last_name, email, password,activo):
         self.username = username
         self.first_name = first_name
         self.last_name = last_name
         self.email = email
         self.password = self.__create_password(password)
+        self.activo = activo
 
 
     def __create_password(self, password):
