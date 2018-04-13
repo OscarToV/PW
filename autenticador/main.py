@@ -10,10 +10,11 @@ import datetime
 
 from config import DevelopmentConfig
 from models import db
-from models import User, Rol, UserRol, Service, UserService, Session, Query
+from models import User, Role, UserRol, Service, UserService, Session, Query
 
 import json
 import forms
+
 
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
